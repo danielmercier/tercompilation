@@ -14,22 +14,14 @@ SOURCES = ast.mli parser.mly lexer.ml main.ml
 
 EXEC = deca
 
-#######################################################################
-# Partie générique, ne pas modifier.
-#######################################################################
-
-
-
-
 # Compilateurs
 
 CAMLC = ocamlc -g -annot
 CAMLOPT = ocamlopt
 CAMLDEP = ocamldep
+CAMLLEX = ocamllex
+CAMLYACC = ocamlyacc
 
-# Interprète
-
-INTERPRET = ./$(EXEC)
 
 # Sources
 
@@ -43,10 +35,10 @@ OPTOBJS = $(OBJS:.cmo=.cmx)
 
 # Tests
 
-TEST_SUBDIRECTORY = $(DIR)
-TEST_SRC = $(shell ls tests/$(TEST_SUBDIRECTORY)/*.ml)
-
-TEST_SRC_ALL = $(foreach test_dir, $(TEST_DIRECTORIES), \
+# TEST_SUBDIRECTORY = $(DIR)
+# TEST_SRC = $(shell ls tests/$(TEST_SUBDIRECTORY)/*.ml)
+# 
+# TEST_SRC_ALL = $(foreach test_dir, $(TEST_DIRECTORIES), \
 	         $(shell ls tests/$(test_dir)/*.ml))
 
 
@@ -57,7 +49,7 @@ all: depend $(EXEC)
 opt: depend $(EXEC).opt
 
 
-.SUFFIXES: .ml .mli .cmo .cmi .cmx
+.SUFFIXES: .ml .mli .cmo .cmi .cmx .mll .mly
 
 $(EXEC): $(OBJS)
 	$(CAMLC) $(CUSTOM) -o $(EXEC) $(OBJS)
@@ -75,6 +67,33 @@ $(EXEC).opt: $(OPTOBJS)
 .ml.cmx:
 	$(CAMLOPT) -c $<
 
+.mll.cmo:
+	$(CAMLLEX) $<
+	$(CAMLC) -c $*.ml
+
+.mll.cmx:
+	$(CAMLLEX) $<
+	$(CAMLOPT) -c $*.ml
+
+.mly.cmo:
+	$(CAMLYACC) $<
+	$(CAMLC) -c $*.mli
+	$(CAMLC) -c $*.ml
+
+.mly.cmx:
+	$(CAMLYACC) $<
+	$(CAMLOPT) -c $*.mli
+	$(CAMLOPT) -c $*.ml
+
+.mly.cmi:
+	$(CAMLYACC) $<
+	$(CAMLC) -c $*.mli
+
+.mll.ml:
+	$(CAMLLEX) $<
+
+.mly.ml:
+	$(CAMLYACC) $<
 
 test: all
 	@$(foreach file, $(TEST_SRC), \
