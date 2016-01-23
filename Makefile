@@ -4,7 +4,7 @@
 # a.ml, a.ml doit se trouver avant dans la liste.
 #
 
-SOURCES = ast.mli parser.mly lexer.ml main.ml
+SOURCES = error.ml ast.mli lexer.ml parser.mly main.ml
 
 # Répertoires contenant les tests
 
@@ -107,6 +107,7 @@ clean:
 	rm -f *.cm[iox] *~ .*~ *.o *.annot
 	rm -f $(EXEC)
 	rm -f $(EXEC).opt
+	rm -f lexer.ml
 
 depend: $(SML)
 	$(CAMLDEP) $(SMLIY) $(SMLIY:.mly:.mli) > .depend
