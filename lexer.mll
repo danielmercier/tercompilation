@@ -7,8 +7,10 @@
     List.iter (fun (kwd, tok) -> Hashtbl.add keyword_table kwd tok)
             [("boolean", BOOLEAN); ("class", CLASS); ("else", ELSE); ("extends", EXTENDS);
              ("false", FALSE); ("for", FOR); ("if", IF); ("instanceof", INSTANCEOF);
-             ("int", TINT); ("native", NATIVE); ("new", NEW); ("null", NULL); ("public", PUBLIC);
-             ("return", RETURN); ("static", STATIC); ("this", THIS); ("true", TRUE); ("void", VOID)]
+             ("int", INT); ("native", NATIVE); ("new", NEW); ("null", NULL); ("public", PUBLIC);
+             ("return", RETURN); ("static", STATIC); ("this", THIS); ("true", TRUE); ("void", VOID);
+             ("String", TYPESTRING); ("main", MAIN)
+            ]
 
   let current_pos lb = 
     (Lexing.lexeme_start_p lb, Lexing.lexeme_end_p lb)
@@ -31,7 +33,7 @@
     | chiffre+ as cnum
       {
         let num = int_of_string cnum in
-        INT num
+        CONST num
       }
     | '"'([' '-'~']* as str)'"' { STRING str }
     | "++" { INC }
@@ -54,6 +56,12 @@
     | '(' { LPAR }
     | ')' { RPAR }
     | '.' { DOT }
+    | '{' { LEMB }
+    | '}' { REMB }
+    | ';' { SEMICOLON }
+    | ',' { COM }
+    | '[' { LBRA }
+    | ']' { RBRA }
     | eof { EOF }
     | _ { error (Lexical_error "Character not recognized") (current_pos lexbuf) }
 
