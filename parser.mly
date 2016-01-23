@@ -24,7 +24,7 @@
 %type <unit> file class_def class_main rep_class_def opt_class_params class_params
 %type <unit> opt_extends_class_expr rep_decl opt_class_params decl
 %type <unit> decl_att decl_const decl_meth decl_native_meth type rep_type_ident
-%type <unit> type_or_void bloc instr opt_affect_expr opt_expr rep_type_ident_com rep_expr
+%type <unit> bloc instr opt_affect_expr opt_expr rep_type_ident_com rep_expr
 %type <unit> rep_expr_com
 
 %%
@@ -63,11 +63,13 @@ decl_const:
 ;
 
 decl_meth:
-    type_or_void IDENT LPAR rep_type_ident RPAR bloc    { }
+    VOID IDENT LPAR rep_type_ident RPAR bloc    { }
+  | type IDENT LPAR rep_type_ident RPAR bloc    { }
 ;
 
 decl_native_meth:
-    NATIVE type_or_void IDENT LPAR rep_type_ident RPAR SEMICOLON    { }
+    NATIVE VOID IDENT LPAR rep_type_ident RPAR SEMICOLON    { }
+  | NATIVE type IDENT LPAR rep_type_ident RPAR SEMICOLON    { }
 ;
 
 type:
@@ -82,13 +84,14 @@ bloc:
 
 instr:
     SEMICOLON                                                          { }
-  | instr_expr SEMICOLON                                                { }  
+  | instr_expr SEMICOLON                                               { }  
   | type IDENT opt_affect_expr SEMICOLON                               { }       
   | IF LPAR expr RPAR instr                                            { }           
   | IF LPAR expr RPAR instr ELSE instr                                 { }         
   | FOR LPAR opt_expr SEMICOLON opt_expr SEMICOLON opt_expr RPAR instr { }                
   | bloc                                                               { }       
   | RETURN opt_expr SEMICOLON                                          { }         
+;
 
 instr_expr:
     acces AFFECT expr                  { }   
@@ -98,9 +101,11 @@ instr_expr:
   | acces INC                          { }         
   | acces MINUS                        { }       
   | NEW class_expr LPAR rep_expr RPAR  { }             
+;
 
 appel:
     acces LPAR opt_expr_list RPAR { }
+;
 
 expr:
     TRUE                    { }
@@ -130,6 +135,7 @@ expr:
   | instr_expr              { }
   | acces                   { }
   | LPAR expr RPAR          { }
+;
 
 acces:
     IDENT                    { }
@@ -137,36 +143,38 @@ acces:
   | appel DOT IDENT          { }     
   | acces DOT IDENT          { }     
   | LPAR expr RPAR DOT IDENT { } 
+;
 
 expr_list:
     expr                { }
   | expr_list COM expr  { }
-
-type_or_void:
-    type  { }
-  | VOID  { }
 ;
 
 /* Tout les non terminaux optionnel */
 opt_class_params:
     /* empty */   { }
   | class_params  { }
+;
 
 opt_extends_class_expr:
     /* empty */        { }
   | EXTENDS class_expr { }
+;
 
 opt_expr_list:
     /* empty */        { }
   | expr_list          { }
+;
 
 opt_affect_expr:
     /* empty */  { }
   | AFFECT expr  { }
+;
 
 opt_expr:
     /* empty */  { }
   | expr         { }
+;
 
 /************************************/
 
@@ -179,35 +187,41 @@ rep_type_ident:
 rep_type_ident_com:
     type IDENT                        { }
   | type IDENT COM rep_type_ident_com { }
+;
 
 rep_decl:
     /* empty */   { }
-  | decl rep_decl { }
+  | rep_decl decl { }
+;
   
 rep_class_def:
     /* empty */               { }
   | class_def rep_class_def   { }
+;
 
 rep_instr:
     /* empty */     { }
   | rep_instr instr { }
+;
 
 rep_expr:
     /* empty */   { }
   | rep_expr_com  { }
+;
 
 rep_expr_com:
     expr                  { }
   | expr COM rep_expr_com { }
+;
 
 rep1_ident:
     IDENT                { }
   | IDENT COM rep1_ident { }
+;
 
 rep1_class_expr:
     class_expr                      { }
   | class_expr COM rep1_class_expr  { }
+;
 /************************************/
-  
-
 %%
