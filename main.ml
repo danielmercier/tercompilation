@@ -1,12 +1,14 @@
 open Lexing
 open Lexer
+open Parser
 open Format
 
 let token_to_string = function
   | IDENT s -> "Ident : " ^ s
   | INT i -> "Int : " ^ string_of_int i
   | STRING s -> "Chaine : " ^ s
-  | OP o -> "Opération : " ^ Char.escaped o
+  | PLUS | MINUS | MULT | DIV -> "Opération"
+  | RPAR -> "(" | LPAR -> ")"
   | BOOLEAN -> "boolean" | CLASS -> "class" | ELSE -> "else"
   | EXTENDS -> "extends" | FALSE -> "false" | FOR -> "for"
   | IF -> "if" | INSTANCEOF -> "instanceof" | TINT -> "tint"
@@ -28,8 +30,9 @@ let () =
   let c = open_in file in
   let lb = Lexing.from_channel c in
   try
-    let _ = f lb in
+    let i = Parser.expr Lexer.token lb in
     close_in c;
+    print_int i;
     exit 0
   with
     | Error.Error (e,p) ->

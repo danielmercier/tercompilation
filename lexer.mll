@@ -1,17 +1,6 @@
 {
   open Error
-
-  type token =
-    | IDENT of string
-    | INT of int
-    | STRING of string
-    | PLUS | MINUS | MULT | DIV
-    | BOOLEAN | CLASS | ELSE
-    | EXTENDS | FALSE | FOR
-    | IF | INSTANCEOF | TINT
-    | NATIVE | NEW | NULL
-    | PUBLIC | RETURN | STATIC
-    | THIS | TRUE | VOID | EOF
+  open Parser
 
   let keyword_table = Hashtbl.create 72
   let _ = 
@@ -45,10 +34,26 @@
         INT num
       }
     | '"'([' '-'~']* as str)'"' { STRING str }
+    | "++" { INC }
+    | "--" { DEC }
     | '+' { PLUS }
     | '*' { MULT }
     | '-' { MINUS }
     | '/' { DIV }
+    | '%' { MOD }
+    | "==" { EQ }
+    | '=' { AFFECT }
+    | '!' { NOT }
+    | "||" { OR }
+    | "&&" { AND }
+    | "!=" { NEQ }
+    | "<=" { LE }
+    | '<' { LT }
+    | ">=" { GE }
+    | '>' { GT }
+    | '(' { LPAR }
+    | ')' { RPAR }
+    | '.' { DOT }
     | eof { EOF }
     | _ { error (Lexical_error "Character not recognized") (current_pos lexbuf) }
 
