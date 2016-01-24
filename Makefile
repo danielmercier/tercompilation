@@ -110,6 +110,7 @@ clean:
 	rm -f lexer.ml
 	rm -f parser.ml
 	rm -f parser.mli
+	rm -f parser.output
 
 depend: $(SML)
 	$(CAMLDEP) $(SMLIY) $(SMLIY:.mly:.mli) > .depend

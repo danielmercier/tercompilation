@@ -7,7 +7,7 @@
 %token NOT OR AND NEQ LE LT GE GT DOT TYPESTRING LBRA RBRA
 %token BOOLEAN CLASS ELSE LEMB REMB SEMICOLON COM MAIN
 %token EXTENDS FALSE FOR IF INSTANCEOF INT NATIVE NEW NULL
-%token PUBLIC RETURN STATIC THIS TRUE VOID EOF
+%token PUBLIC RETURN STATIC THIS TRUE VOID EOF UMINUS
 
 %right  AFFECT
 %left   OR
@@ -16,9 +16,10 @@
 %left   LT LE GT GE INSTANCEOF
 %left   PLUS MINUS
 %left   MULT DIV MOD
-%right  NOT INC DEC CAST
+%right  NOT INC DEC UMINUS
 %left   DOT
-/* Pbm avec le moins unaire, résolu dans la grammaire directement */
+
+/* Pbm avec le moins unaire, résolu avec l'option %prec et UMINUS */
 
 %start file
 %type <unit> file class_def class_main rep_class_def opt_class_params class_params
@@ -114,7 +115,7 @@ expr:
   | STRING                  { }
   | NULL                    { }
   | NOT expr                { }
-  | MINUS expr              { }
+  | MINUS expr %prec UMINUS { } /* Permet a MINUS de ce comporter avec les règle de UMINUS */
   | expr PLUS expr          { }
   | expr MINUS expr         { }
   | expr MULT expr          { }
