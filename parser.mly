@@ -7,7 +7,14 @@
 %token NOT OR AND NEQ LE LT GE GT DOT TYPESTRING LBRA RBRA
 %token BOOLEAN CLASS ELSE LEMB REMB SEMICOLON COM MAIN
 %token EXTENDS FALSE FOR IF INSTANCEOF INT NATIVE NEW NULL
-%token PUBLIC RETURN STATIC THIS TRUE VOID EOF UMINUS
+%token PUBLIC RETURN STATIC THIS TRUE VOID EOF UMINUS CAST
+%token PREC_IF PREC_ACCES_IDENT
+
+%nonassoc PREC_IF
+%nonassoc ELSE
+
+%nonassoc PREC_ACCES_IDENT
+%nonassoc RPAR    /* Pour le cast */
 
 %right  AFFECT
 %left   OR
@@ -16,7 +23,7 @@
 %left   LT LE GT GE INSTANCEOF
 %left   PLUS MINUS
 %left   MULT DIV MOD
-%right  NOT INC DEC UMINUS
+%right  NOT INC DEC UMINUS CAST
 %left   DOT
 
 /* Pbm avec le moins unaire, résolu avec l'option %prec et UMINUS */
@@ -87,8 +94,8 @@ instr:
     SEMICOLON                                                          { }
   | instr_expr SEMICOLON                                               { }  
   | type IDENT opt_affect_expr SEMICOLON                               { }       
-  | IF LPAR expr RPAR instr                                            { }           
-  | IF LPAR expr RPAR instr ELSE instr                                 { }         
+  | IF LPAR expr RPAR instr   %prec PREC_IF                            { }           
+  | IF LPAR expr RPAR instr ELSE instr                                 { }
   | FOR LPAR opt_expr SEMICOLON opt_expr SEMICOLON opt_expr RPAR instr { }                
   | bloc                                                               { }       
   | RETURN opt_expr SEMICOLON                                          { }         
@@ -98,9 +105,9 @@ instr_expr:
     acces AFFECT expr                  { }   
   | appel                              { }         
   | INC acces                          { }           
-  | MINUS acces                        { }           
+  | DEC acces                          { }           
   | acces INC                          { }         
-  | acces MINUS                        { }       
+  | acces DEC                          { }       
   | NEW class_expr LPAR rep_expr RPAR  { }             
 ;
 
@@ -130,26 +137,29 @@ expr:
   | expr GT expr            { }
   | expr GE expr            { }
   | expr INSTANCEOF expr    { }
-  | LPAR IDENT RPAR expr    { }
-  | LPAR INT RPAR expr      { }
-  | LPAR BOOLEAN RPAR expr  { }
+  | cast expr   %prec CAST  { }
   | instr_expr              { }
   | acces                   { }
   | LPAR expr RPAR          { }
 ;
 
 acces:
-    IDENT                    { }
-  | THIS                     { }  
-  | appel DOT IDENT          { }     
-  | acces DOT IDENT          { }     
-  | LPAR expr RPAR DOT IDENT { } 
+    IDENT %prec PREC_ACCES_IDENT  { }
+  | THIS                          { }  
+  | appel DOT IDENT               { }     
+  | acces DOT IDENT               { }     
+  | LPAR expr RPAR DOT IDENT      { } 
 ;
 
 expr_list:
     expr                { }
   | expr_list COM expr  { }
 ;
+
+cast:
+    LPAR IDENT RPAR     { }
+  | LPAR INT RPAR       { }
+  | LPAR BOOLEAN RPAR   { }
 
 /* Tout les non terminaux optionnel */
 opt_class_params:
