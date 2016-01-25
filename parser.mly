@@ -1,4 +1,8 @@
 %{
+  open Error
+
+  let current_pos () = 
+    (Parsing.symbol_start_pos (), Parsing.symbol_end_pos ())
 %}
 
 %token <string> IDENT STRING
@@ -38,6 +42,7 @@
 %%
 file:
     rep_class_def class_main EOF    { }
+  | error                           { error Syntax_error ( current_pos () ) }
 ;
 
 class_def: 

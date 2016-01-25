@@ -27,12 +27,14 @@
 
   let alpha = ['a'-'z''A'-'Z']
   let chiffre = ['0'-'9']
+  let eol = ['\n''\r'] | "\r\n"
+  let whitespace = [' ''\t']
 
   rule token = parse
     | "//"[^'\n']*'\n' { token lexbuf } (* Commentaire sur une ligne *)
-    | "/*" { comment (current_pos lexbuf) lexbuf } (* Commentaire sur plusieurs lignes *)
-    | ['\n''\r'] | "\r\n" { next_line lexbuf; token lexbuf } (* Whitespace, rien a faire *)
-    | [' ''\t'] { token lexbuf } (* Whitespace, rien a faire *)
+    | "/*" { comment (current_pos lexbuf) lexbuf; token lexbuf } (* Commentaire sur plusieurs lignes, imbriqué *)
+    | eol { next_line lexbuf; token lexbuf }
+    | whitespace { token lexbuf } (* Whitespace, rien a faire *)
     | (alpha | '_')(alpha | '_' | chiffre)* as id
       {
         try
@@ -71,18 +73,23 @@
     | eof { EOF }
     | _ { error (Lexical_error "Character not recognized") (current_pos lexbuf) }
 
-  and comment pos = parse (* Permet de donner plus d'info sur l'erreur *)
-    | "*/" { token lexbuf }
+  and comment pos = parse (* Permet de donner plus d'info sur l'erreur, et les commentaires imbriqué *)
+    | "/*" { comment pos lexbuf; comment pos lexbuf }
+    | "*/" { }
+    | eol { next_line lexbuf; comment pos lexbuf }
     | eof { error (Lexical_error "Comment opened but not closed") pos}
     | _ { comment pos lexbuf }
 
   and read_string pos = parse
     | "\\n" { "\n" ^ (read_string pos lexbuf) }
-    | [' '-'~'] as c { (String.make 1 c) ^ (read_string pos lexbuf) }
+    | "\\t" { "\t" ^ (read_string pos lexbuf) }
+    | "\\\"" { "\"" ^ (read_string pos lexbuf) }
+    | "\\\\" { "\\" ^ (read_string pos lexbuf) }
     | '"' { "" }
-    | eof { error (Lexical_error "String never closed") (pos) }
-    | _ as c { error (Lexical_error ("Illegal character " ^ String.make 1 c ^ " in string")) (current_pos lexbuf) }
-
+    | [' '-'~'] as c { (String.make 1 c) ^ (read_string pos lexbuf) }
+    | eof { error (Lexical_error "String not terminated") (current_pos lexbuf) }
+    | _ as c { error (Lexical_error ("Illegal character '" ^ String.make 1 c ^ "' in string")) (current_pos lexbuf) }
+            
 {
 
 }
