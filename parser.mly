@@ -119,7 +119,7 @@ expr:
     TRUE                    { }
   | FALSE                   { }
   | CONST                   { }
-  | STRING                  { }
+  | STRING                  { print_string $1 }
   | NULL                    { }
   | NOT expr                { }
   | MINUS expr %prec UMINUS { } /* Permet a MINUS de ce comporter avec les règle de UMINUS */
@@ -227,7 +227,7 @@ rep_expr_com:
 
 rep1_ident:
     IDENT                { }
-  | IDENT COM rep1_ident { }
+  | rep1_ident COM IDENT { }
 ;
 
 rep1_class_expr:

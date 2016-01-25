@@ -1,6 +1,7 @@
 {
   open Error
   open Parser
+  open Lexing
 
   let keyword_table = Hashtbl.create 72
   let _ = 
@@ -14,6 +15,14 @@
 
   let current_pos lb = 
     (Lexing.lexeme_start_p lb, Lexing.lexeme_end_p lb)
+
+  let next_line lexbuf =
+    let pos = lexbuf.lex_curr_p in
+      lexbuf.lex_curr_p <-
+        {  
+          pos with pos_bol = lexbuf.lex_curr_pos;
+          pos_lnum = pos.pos_lnum + 1
+        }
 }
 
   let alpha = ['a'-'z''A'-'Z']
@@ -22,7 +31,8 @@
   rule token = parse
     | "//"[^'\n']*'\n' { token lexbuf } (* Commentaire sur une ligne *)
     | "/*" { comment (current_pos lexbuf) lexbuf } (* Commentaire sur plusieurs lignes *)
-    | [' ''\t''\n'] { token lexbuf } (* Whitespace, rien a faire *)
+    | ['\n''\r'] | "\r\n" { next_line lexbuf; token lexbuf } (* Whitespace, rien a faire *)
+    | [' ''\t'] { token lexbuf } (* Whitespace, rien a faire *)
     | (alpha | '_')(alpha | '_' | chiffre)* as id
       {
         try
@@ -30,12 +40,8 @@
         with
           Not_found -> IDENT id
       }
-    | chiffre+ as cnum
-      {
-        let num = int_of_string cnum in
-        CONST num
-      }
-    | '"'([' '-'~']* as str)'"' { STRING str }
+    | chiffre+ as cnum { CONST (int_of_string cnum) }
+    | '"' { STRING (read_string (current_pos lexbuf) lexbuf) }
     | "++" { INC }
     | "--" { DEC }
     | '+' { PLUS }
@@ -69,6 +75,13 @@
     | "*/" { token lexbuf }
     | eof { error (Lexical_error "Comment opened but not closed") pos}
     | _ { comment pos lexbuf }
+
+  and read_string pos = parse
+    | "\\n" { "\n" ^ (read_string pos lexbuf) }
+    | [' '-'~'] as c { (String.make 1 c) ^ (read_string pos lexbuf) }
+    | '"' { "" }
+    | eof { error (Lexical_error "String never closed") (pos) }
+    | _ as c { error (Lexical_error ("Illegal character " ^ String.make 1 c ^ " in string")) (current_pos lexbuf) }
 
 {
 
