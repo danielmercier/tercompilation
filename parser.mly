@@ -197,7 +197,7 @@ rep_type_ident:
 
 rep_type_ident_com:
     type IDENT                        { }
-  | type IDENT COM rep_type_ident_com { }
+  | rep_type_ident_com COM type IDENT { }
 ;
 
 rep_decl:
@@ -207,7 +207,7 @@ rep_decl:
   
 rep_class_def:
     /* empty */               { }
-  | class_def rep_class_def   { }
+  | rep_class_def class_def   { }
 ;
 
 rep_instr:
@@ -222,7 +222,7 @@ rep_expr:
 
 rep_expr_com:
     expr                  { }
-  | expr COM rep_expr_com { }
+  | rep_expr_com COM expr { }
 ;
 
 rep1_ident:
@@ -232,7 +232,7 @@ rep1_ident:
 
 rep1_class_expr:
     class_expr                      { }
-  | class_expr COM rep1_class_expr  { }
+  | rep1_class_expr COM class_expr  { }
 ;
 /************************************/
 %%
