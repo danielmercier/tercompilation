@@ -35,7 +35,7 @@
 %start file
 %type <unit> file class_def class_main rep_class_def opt_class_params class_params
 %type <unit> opt_extends_class_expr rep_decl opt_class_params decl
-%type <unit> decl_att decl_const decl_meth decl_native_meth type rep_type_ident
+%type <unit> decl_att decl_const decl_meth decl_native_meth type_ rep_type_ident
 %type <unit> bloc instr opt_affect_expr opt_expr rep_type_ident_com rep_expr
 %type <unit> rep_expr_com
 
@@ -68,7 +68,7 @@ decl:
 ;
 
 decl_att:
-    type IDENT SEMICOLON    { }
+    type_ IDENT SEMICOLON    { }
 ;
 
 decl_const:
@@ -77,12 +77,12 @@ decl_const:
 
 decl_meth:
     VOID IDENT LPAR rep_type_ident RPAR bloc    { }
-  | type IDENT LPAR rep_type_ident RPAR bloc    { }
+  | type_ IDENT LPAR rep_type_ident RPAR bloc    { }
 ;
 
 decl_native_meth:
     NATIVE VOID IDENT LPAR rep_type_ident RPAR SEMICOLON    { }
-  | NATIVE type IDENT LPAR rep_type_ident RPAR SEMICOLON    { }
+  | NATIVE type_ IDENT LPAR rep_type_ident RPAR SEMICOLON    { }
 ;
 
 type:
@@ -98,7 +98,7 @@ bloc:
 instr:
     SEMICOLON                                                          { }
   | instr_expr SEMICOLON                                               { }  
-  | type IDENT opt_affect_expr SEMICOLON                               { }       
+  | type_ IDENT opt_affect_expr SEMICOLON                               { }       
   | IF LPAR expr RPAR instr   %prec PREC_IF                            { }           
   | IF LPAR expr RPAR instr ELSE instr                                 { }
   | FOR LPAR opt_expr SEMICOLON opt_expr SEMICOLON opt_expr RPAR instr { }                
@@ -201,8 +201,8 @@ rep_type_ident:
 ;
 
 rep_type_ident_com:
-    type IDENT                        { }
-  | rep_type_ident_com COM type IDENT { }
+    type_ IDENT                        { }
+  | rep_type_ident_com COM type_ IDENT { }
 ;
 
 rep_decl:
