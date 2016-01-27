@@ -8,7 +8,7 @@
 %token <string> IDENT STRING
 %token <int> CONST
 %token RPAR LPAR PLUS MINUS MULT DIV INC DEC MOD EQ AFFECT 
-%token NOT OR AND NEQ LE LT GE GT DOT TYPESTRING LBRA RBRA
+%token NOT OR AND NEQ LE LT GE GT DOT LBRA RBRA
 %token BOOLEAN CLASS ELSE LEMB REMB SEMICOLON COM MAIN
 %token EXTENDS FALSE FOR IF INSTANCEOF INT NATIVE NEW NULL
 %token PUBLIC RETURN STATIC THIS TRUE VOID EOF UMINUS CAST
@@ -27,7 +27,8 @@
 %left   LT LE GT GE INSTANCEOF
 %left   PLUS MINUS
 %left   MULT DIV MOD
-%right  NOT INC DEC UMINUS CAST
+%right  NOT INC DEC CAST
+%nonassoc UMINUS 
 %left   DOT
 
 /* Pbm avec le moins unaire, résolu avec l'option %prec et UMINUS */
@@ -37,20 +38,24 @@
 %type <unit> opt_extends_class_expr rep_decl opt_class_params decl
 %type <unit> decl_att decl_const decl_meth decl_native_meth type_ rep_type_ident
 %type <unit> bloc instr opt_affect_expr opt_expr rep_type_ident_com rep_expr
-%type <unit> rep_expr_com
+%type <unit> rep_expr_com tstring
 
 %%
 file:
     rep_class_def class_main EOF    { }
-  | error                           { error Syntax_error ( current_pos () ) }
+  | error                           { error Syntax_error ( current_pos () ) } 
 ;
 
 class_def: 
     CLASS IDENT opt_class_params opt_extends_class_expr LEMB rep_decl REMB { }
 ;
 
+tstring:
+    IDENT { if($1 <> "String") then error Syntax_error (current_pos ()) }
+;
+
 class_main:
-    PUBLIC CLASS IDENT LEMB PUBLIC STATIC VOID MAIN LPAR TYPESTRING IDENT LBRA RBRA RPAR bloc REMB { }
+    PUBLIC CLASS IDENT LEMB PUBLIC STATIC VOID MAIN LPAR tstring IDENT LBRA RBRA RPAR bloc REMB { }
 ;
 
 class_params:
@@ -77,7 +82,8 @@ decl_const:
 
 decl_meth:
     VOID IDENT LPAR rep_type_ident RPAR bloc    { }
-  | type_ IDENT LPAR rep_type_ident RPAR bloc    { }
+  | type_ IDENT LPAR rep_type_ident RPAR bloc   { }
+  | error                                       { print_string "Error method\n" }
 ;
 
 decl_native_meth:
@@ -85,7 +91,7 @@ decl_native_meth:
   | NATIVE type_ IDENT LPAR rep_type_ident RPAR SEMICOLON    { }
 ;
 
-type:
+type_:
     BOOLEAN     { }
   | INT         { }
   | class_expr  { }
@@ -98,13 +104,14 @@ bloc:
 instr:
     SEMICOLON                                                          { }
   | instr_expr SEMICOLON                                               { }  
-  | type_ IDENT opt_affect_expr SEMICOLON                               { }       
+  | type_ IDENT opt_affect_expr SEMICOLON                              { }       
   | IF LPAR expr RPAR instr   %prec PREC_IF                            { }           
   | IF LPAR expr RPAR instr ELSE instr                                 { }
   | FOR LPAR opt_expr SEMICOLON opt_expr SEMICOLON opt_expr RPAR instr { }                
   | bloc                                                               { }       
   | RETURN opt_expr SEMICOLON                                          { }         
-;
+  | error SEMICOLON                                                    { print_string "instruction error\n" }
+
 
 instr_expr:
     acces AFFECT expr                  { }   

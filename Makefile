@@ -1,55 +1,53 @@
 #
-# Mettre la liste des fichiers .ml et .mli
+# Mettre la liste des fichiers .ml, .mly, .mll et .mli
 # constituant le projet. Si un fichier b.ml dépend d'un fichier
 # a.ml, a.ml doit se trouver avant dans la liste.
 #
 
-SOURCES = error.ml ast.mli parser.mly lexer.mll main.ml
-
-# Répertoires contenant les tests
-
-# TEST_DIRECTORIES = print arith let letin if
+SOURCES =  error.ml ast.mli parser.mly lexer.mll main.ml
 
 # Nom du binaire
 
 EXEC = deca
 
+#######################################################################
+# Partie générique, ne pas modifier.
+#######################################################################
+
+
+
+
 # Compilateurs
 
-CAMLC = ocamlc -g -annot
+CAMLC = ocamlc -g
 CAMLOPT = ocamlopt
 CAMLDEP = ocamldep
 CAMLLEX = ocamllex
 CAMLYACC = ocamlyacc
 
-
 # Sources
+# Un peu de magie noire pour détecter les .mly/.mll et convaincre make
+# d'appliquer les bonnes règles pour générer les .ml, .mli etc. correpondants.
 
-SRC_MLL = $(filter %.mll, $(SOURCES))
-SRC_MLY = $(filter %.mly, $(SOURCES))
-SMLIY = $(SOURCES:.mly=.ml)
-SMLIYL = $(SMLIY:.mll=.ml)
-SMLYL = $(filter %.ml,$(SMLIYL))
-OBJS = $(SMLYL:.ml=.cmo)
+PARSER_MLY=$(filter %.mly, $(SOURCES))
+PARSER_MLI=$(PARSER_MLY:.mly=.mli)
+PARSER_ML=$(PARSER_MLY:.mly=.ml)
+
+LEXER_MLL=$(filter %.mll, $(SOURCES))
+LEXER_ML=$(LEXER_MLL:.mll=.ml)
+
+ALL_SOURCES=$(patsubst $(LEXER_MLL), $(LEXER_ML), $(patsubst $(PARSER_MLY), $(PARSER_MLI) $(PARSER_ML), $(SOURCES)))
+
+OBJS = $(patsubst %.ml, %.cmo, $(filter %.ml, $(ALL_SOURCES)))
 OPTOBJS = $(OBJS:.cmo=.cmx)
-
-# Tests
-
-# TEST_SUBDIRECTORY = $(DIR)
-# TEST_SRC = $(shell ls tests/$(TEST_SUBDIRECTORY)/*.ml)
-# 
-# TEST_SRC_ALL = $(foreach test_dir, $(TEST_DIRECTORIES), \
-	         $(shell ls tests/$(test_dir)/*.ml))
-
-
-# Cibles
+JS_OBJS = $(subst main.cmo, , $(OBJS))
 
 all: depend $(EXEC)
 
 opt: depend $(EXEC).opt
 
 
-.SUFFIXES: .ml .mli .cmo .cmi .cmx .mll .mly
+.SUFFIXES: .ml .mli .cmo .cmi .cmx .mll .mly .java .js
 
 $(EXEC): $(OBJS)
 	$(CAMLC) $(CUSTOM) -o $(EXEC) $(OBJS)
@@ -57,6 +55,12 @@ $(EXEC): $(OBJS)
 $(EXEC).opt: $(OPTOBJS)
 	$(CAMLOPT) -o $(EXEC) $(OPTOBJS)
 
+main_js: $(JS_OBJS) main_js.ml
+	 ocamlfind ocamlc -package js_of_ocaml -package js_of_ocaml.syntax \
+          -syntax camlp4o -linkpkg -o main_js $(JS_OBJS) main_js.ml 
+
+main_js.js: main_js
+	 js_of_ocaml main_js
 
 .ml.cmo:
 	$(CAMLC) -c $<
@@ -67,52 +71,26 @@ $(EXEC).opt: $(OPTOBJS)
 .ml.cmx:
 	$(CAMLOPT) -c $<
 
-.mll.cmo:
-	$(CAMLLEX) $<
-	$(CAMLC) -c $*.ml
-
-.mll.cmx:
-	$(CAMLLEX) $<
-	$(CAMLOPT) -c $*.ml
-
-.mly.cmo:
-	$(CAMLYACC) $<
-	$(CAMLC) -c $*.mli
-	$(CAMLC) -c $*.ml
-
-.mly.cmx:
-	$(CAMLYACC) $<
-	$(CAMLOPT) -c $*.mli
-	$(CAMLOPT) -c $*.ml
-
-.mly.cmi:
-	$(CAMLYACC) $<
-	$(CAMLC) -c $*.mli
-
-.mll.ml:
+$(LEXER_ML): $(LEXER_MLL)
 	$(CAMLLEX) $<
 
-.mly.ml:
+$(PARSER_MLI): $(PARSER_ML)
+
+$(PARSER_ML): $(PARSER_MLY)
 	$(CAMLYACC) $<
 
-test: all
-	@$(foreach file, $(TEST_SRC), \
-	echo "$(file)"; $(INTERPRET) $(file); echo "------ ------ ------ ------\n";)
+.java.js: $(EXEC)
+	./$(EXEC) $<
 
-test_all: all
-	@$(foreach file, $(TEST_SRC_ALL), \
-	echo "$(file)"; $(INTERPRET) $(file); echo "------ ------ ------ ------\n";)
 
 clean:
-	rm -f *.cm[iox] *~ .*~ *.o *.annot
-	rm -f $(EXEC)
+	rm -f *.cm[iox] *~ .*~ *.o
+	rm -f $(PARSER_ML) $(PARSER_MLI) $(LEXER_ML)
+	rm -f $(EXEC) main_js main_js.js
 	rm -f $(EXEC).opt
-	rm -f lexer.ml
-	rm -f parser.ml
-	rm -f parser.mli
-	rm -f parser.output
+	rm -f $(TESTS_JS)
 
-depend: $(SML)
-	$(CAMLDEP) $(SMLIY) $(SMLIY:.mly:.mli) > .depend
+depend: $(ALL_SOURCES)
+	$(CAMLDEP) $(ALL_SOURCES) > depend
 
--include .depend
+-include depend

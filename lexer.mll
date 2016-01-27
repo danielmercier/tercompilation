@@ -10,7 +10,7 @@
              ("false", FALSE); ("for", FOR); ("if", IF); ("instanceof", INSTANCEOF);
              ("int", INT); ("native", NATIVE); ("new", NEW); ("null", NULL); ("public", PUBLIC);
              ("return", RETURN); ("static", STATIC); ("this", THIS); ("true", TRUE); ("void", VOID);
-             ("String", TYPESTRING); ("main", MAIN)
+             ("main", MAIN)
             ]
 
   let current_pos lb = 
