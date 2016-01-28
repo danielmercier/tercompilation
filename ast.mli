@@ -37,25 +37,30 @@ type binop =
   | And
   | Or
   
-type appel = string
-
-type acces =
-  | Ident of ident node
-  | This
-  | Appel_ident of appel node * ident node
-  | Acces_ident of acces node * ident node
-
 type expr =
+  | Const of const
   | Unop of unop * expr node
   | Binop of binop * expr node * expr node
   | Instanceof of expr node * class_expr node
   | Cast of type_ * expr node
+
   (* instr_expr dans la grammaire *)
-  | Affect of acces node * expr node
-  | Appel of appel node
-  | Post_incr_acces of acces node
-  | Pre_incr_acces of acces node
-  | Post_decr_acces of acces node
-  | Pre_decr_acces of acces node
+  | Affect of expr node * expr node
+  | Post_incr of expr node
+  | Pre_incr of expr node
+  | Post_decr of expr node
+  | Pre_decr of expr node
   | New of class_expr node * (expr node) list
   (********************************)
+
+  (* acces dans la grammaire *)
+  | Ident of ident node
+  | This
+  | Dot_acces of expr node * ident node
+  (***************************)
+
+  (* appel dans la grammaire *)
+  | Appel of expr node * (expr node) list
+  (***************************)
+
+
