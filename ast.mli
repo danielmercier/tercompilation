@@ -3,6 +3,11 @@ type position = Lexing.position * Lexing.position
 type ident = string
 type 'a node = { value: 'a; pos: position }
 
+(* Valeur optionnel, existe ou pas *)
+type 'a option = 
+  | None
+  | Some of 'a
+
 type const =
   | Cbool of bool
   | Cint of int
@@ -46,21 +51,39 @@ type expr =
 
   (* instr_expr dans la grammaire *)
   | Affect of expr node * expr node
-  | Post_incr of expr node
-  | Pre_incr of expr node
-  | Post_decr of expr node
-  | Pre_decr of expr node
+  | PostIncr of expr node
+  | PreIncr of expr node
+  | PostDecr of expr node
+  | PreDecr of expr node
   | New of class_expr node * (expr node) list
   (********************************)
 
   (* acces dans la grammaire *)
   | Ident of ident node
   | This
-  | Dot_acces of expr node * ident node
+  | DotAcces of expr node * ident node
   (***************************)
 
   (* appel dans la grammaire *)
   | Appel of expr node * (expr node) list
   (***************************)
 
+type bloc = instr list
 
+type instr =
+  | Nothing
+  | Iexpr of expr node
+  | Declaration of type_ * ident * expr option
+  | If of expr * instr
+  | IfElse of expr * instr * instr
+  | For of expr option * expr option * expr option * instr
+  | Bloc of bloc
+  | Return of expr option
+
+type class_params = ident list
+type class_def = ident * class_params option * class_expr option * decl list
+type class_main = ident * ident * bloc
+
+type definition =
+  | ClassDef of class_def
+  | ClassMain of class_main
