@@ -3,11 +3,6 @@ type position = Lexing.position * Lexing.position
 type ident = string
 type 'a node = { value: 'a; pos: position }
 
-(* Valeur optionnel, existe ou pas *)
-type 'a option = 
-  | None
-  | Some of 'a
-
 type const =
   | Cbool of bool
   | Cint of int
@@ -15,13 +10,13 @@ type const =
   | Cnull
 
 type class_expr =
-  | Tclass of ident * (class_expr node) list
+  | Tclass of ident * (class_expr) list
 
 type type_ =
   | Tbool
   | Tint
   | Tvoid
-  | Tident of class_expr node
+  | Tident of class_expr
 
 type unop =
   | Uminus
@@ -44,35 +39,35 @@ type binop =
   
 type expr =
   | Const of const
-  | Unop of unop * expr node
-  | Binop of binop * expr node * expr node
-  | Instanceof of expr node * class_expr node
-  | Cast of type_ * expr node
+  | Unop of unop * expr
+  | Binop of binop * expr * expr
+  | Instanceof of expr * class_expr
+  | Cast of type_ * expr
 
   (* instr_expr dans la grammaire *)
-  | Affect of expr node * expr node
-  | PostIncr of expr node
-  | PreIncr of expr node
-  | PostDecr of expr node
-  | PreDecr of expr node
-  | New of class_expr node * (expr node) list
+  | Affect of expr * expr
+  | PostIncr of expr
+  | PreIncr of expr
+  | PostDecr of expr
+  | PreDecr of expr
+  | New of class_expr * (expr) list
   (********************************)
 
   (* acces dans la grammaire *)
-  | Ident of ident node
+  | Ident of ident
   | This
-  | DotAcces of expr node * ident node
+  | DotAcces of expr * ident
   (***************************)
 
   (* appel dans la grammaire *)
-  | Appel of expr node * (expr node) list
+  | Appel of expr * (expr) list
   (***************************)
 
 type bloc = instr list
 
-type instr =
+and instr =
   | Nothing
-  | Iexpr of expr node
+  | Iexpr of expr
   | Declaration of type_ * ident * expr option
   | If of expr * instr
   | IfElse of expr * instr * instr
@@ -80,10 +75,16 @@ type instr =
   | Bloc of bloc
   | Return of expr option
 
+type args = (type_ * ident) list
+
+type decl =
+  | DeclAtt of type_ * ident
+  | DeclConst of ident * args * bloc
+  | DeclMeth of type_ * ident * args * bloc
+  | DeclNativeMeth of type_ * ident * args
+
 type class_params = ident list
 type class_def = ident * class_params option * class_expr option * decl list
 type class_main = ident * ident * bloc
 
-type definition =
-  | ClassDef of class_def
-  | ClassMain of class_main
+type prog = class_def list * class_main
