@@ -4,9 +4,9 @@ open Format
 
 type error = 
   | Lexical_error of string
-  | Syntax_error
-  (*| Interpretation_error
-  | Unknown_identifier of string*)
+  | Syntax_error of string option
+  | Interpretation_error
+  (*| Unknown_identifier of string*)
 
 exception Error of error * Ast.position
 
@@ -22,9 +22,10 @@ let report_loc fmt file (b,e) =
 let to_string e =
   match e with
     | Lexical_error s -> sprintf "lexical error: %s" s
-    | Syntax_error -> sprintf "syntax error"
-    (*| Interpretation_error -> sprintf "interpretation error"
-    | Unknown_identifier id -> sprintf "unknown identifier %s" id*)
+    | Syntax_error None -> sprintf "syntax error"
+    | Syntax_error (Some s) -> sprintf "syntax error: %s" s
+    | Interpretation_error -> sprintf "interpretation error"
+    (*| Unknown_identifier id -> sprintf "unknown identifier %s" id*)
 
 let print fmt f e p =
   report_loc fmt f p;

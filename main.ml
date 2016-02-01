@@ -8,7 +8,7 @@ let () =
   let c = open_in file in
   let lb = Lexing.from_channel c in
   try
-    let _ = Parser.file Lexer.token lb in
+    let ast = Parser.prog Lexer.token lb in
     (*let _ = f lb in*)
     close_in c;
     exit 0
