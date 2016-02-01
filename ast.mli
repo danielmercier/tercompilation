@@ -9,8 +9,8 @@ type const =
   | Cstring of string
   | Cnull
 
-type class_expr =
-  | Tclass of ident * (class_expr) list
+type class_expr = 
+  | CIdent of ident * (class_expr) list
 
 type type_ =
   | Tbool
@@ -84,7 +84,7 @@ type decl =
   | DeclNativeMeth of type_ * ident * args
 
 type class_params = ident list
-type class_def = ident * class_params option * class_expr option * decl list
+type class_def = ident * class_params * class_expr option * decl list
 type class_main = ident * ident * bloc
 
 type prog = class_def list * class_main
