@@ -22,15 +22,29 @@ type unop =
   | Uminus
   | Unot
 
-type binop =
+type intbinop =
   | Add | Sub | Mult | Div | Mod
-  | Eq  | Neq | Lt   | Le  | Gt | Ge
+
+type bineq = 
+  | Eq | Neq 
+
+type intbincmp =
+  | Lt | Le | Gt | Ge
+
+type boolbinop =
   | And | Or
   
 type expr =
   | Const of const
   | Unop of unop * expr
-  | Binop of binop * expr * expr
+
+  (* Opérations séparée pour le typage *)
+  | Intbinop of intbinop * expr * expr
+  | Bineq of bineq * expr * expr
+  | Intbincmp of intbincmp * expr * expr
+  | Boolbinop of boolbinop * expr * expr
+  (*************************************)
+
   | Instanceof of expr * class_expr
   | Cast of type_ * expr
 

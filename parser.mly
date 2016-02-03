@@ -157,19 +157,19 @@ expr:
   | NULL                          { Const Cnull }
   | NOT expr                      { Unop (Unot, $2) }
   | MINUS expr %prec UMINUS       { Unop (Uminus, $2) } /* Permet a MINUS de ce comporter avec les règle de UMINUS */
-  | expr PLUS expr                { Binop(Add, $1, $3) }
-  | expr MINUS expr               { Binop(Sub, $1, $3) }
-  | expr MULT expr                { Binop(Mult, $1, $3) }
-  | expr DIV expr                 { Binop(Div, $1, $3) }
-  | expr MOD expr                 { Binop(Mod, $1, $3) }
-  | expr AND expr                 { Binop(And, $1, $3) }
-  | expr OR expr                  { Binop(Or, $1, $3) }
-  | expr EQ expr                  { Binop(Eq, $1, $3) }
-  | expr NEQ expr                 { Binop(Neq, $1, $3) }
-  | expr LT expr                  { Binop(Lt, $1, $3) }
-  | expr LE expr                  { Binop(Le, $1, $3) }
-  | expr GT expr                  { Binop(Gt, $1, $3) }
-  | expr GE expr                  { Binop(Ge, $1, $3) }
+  | expr PLUS expr                { Intbinop(Add, $1, $3) }
+  | expr MINUS expr               { Intbinop(Sub, $1, $3) }
+  | expr MULT expr                { Intbinop(Mult, $1, $3) }
+  | expr DIV expr                 { Intbinop(Div, $1, $3) }
+  | expr MOD expr                 { Intbinop(Mod, $1, $3) }
+  | expr AND expr                 { Boolbinop(And, $1, $3) }
+  | expr OR expr                  { Boolbinop(Or, $1, $3) }
+  | expr EQ expr                  { Bineq(Eq, $1, $3) }
+  | expr NEQ expr                 { Bineq(Neq, $1, $3) }
+  | expr LT expr                  { Intbincmp(Lt, $1, $3) }
+  | expr LE expr                  { Intbincmp(Le, $1, $3) }
+  | expr GT expr                  { Intbincmp(Gt, $1, $3) }
+  | expr GE expr                  { Intbincmp(Ge, $1, $3) }
   | expr INSTANCEOF class_expr    { Instanceof($1, $3) }
   | cast expr   %prec CAST        { Cast($1, $2) }
   | instr_expr                    { $1 }
