@@ -32,8 +32,8 @@
 
   rule token = parse
     | "//"[^'\n']*'\n' { token lexbuf } (* Commentaire sur une ligne *)
-    | "/*" { comment (current_pos lexbuf) lexbuf; token lexbuf } (* Commentaire sur plusieurs lignes, imbriqué *)
-    | eol { next_line lexbuf; token lexbuf }
+    | "/*" { comment (current_pos lexbuf) lexbuf } (* Commentaire sur plusieurs lignes *)
+    | eol { next_line lexbuf; token lexbuf } (* increment du numero de ligne *)
     | whitespace { token lexbuf } (* Whitespace, rien a faire *)
     | (alpha | '_')(alpha | '_' | chiffre)* as id
       {
@@ -73,9 +73,8 @@
     | eof { EOF }
     | _ { error (Lexical_error "Character not recognized") (current_pos lexbuf) }
 
-  and comment pos = parse (* Permet de donner plus d'info sur l'erreur, et les commentaires imbriqué *)
-    | "/*" { comment pos lexbuf; comment pos lexbuf }
-    | "*/" { }
+  and comment pos = parse (* Permet de donner plus d'info sur l'erreur *)
+    | "*/" { token lexbuf }
     | eol { next_line lexbuf; comment pos lexbuf }
     | eof { error (Lexical_error "Comment opened but not closed") pos}
     | _ { comment pos lexbuf }
