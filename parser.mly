@@ -21,7 +21,7 @@
 %nonassoc PREC_ACCES_IDENT
 %nonassoc RPAR    /* Pour le cast */
 
-%nonassoc IDENT_CLASS_EXPR /* Precedence moin forte que LT */
+%nonassoc IDENT_CLASS_EXPR /* Precedence moins forte que LT */
 
 %right  AFFECT
 %left   OR
