@@ -2,7 +2,7 @@ open Lexing
 open Ast
 open Format
 
-type error = 
+type error =
   | Lexical_error of string
   | Syntax_error of string option
   | Interpretation_error

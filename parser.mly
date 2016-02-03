@@ -2,13 +2,13 @@
   open Error
   open Ast
 
-  let current_pos () = 
+  let current_pos () =
     (Parsing.symbol_start_pos (), Parsing.symbol_end_pos ())
 %}
 
 %token <string> IDENT STRING
 %token <int> CONST
-%token RPAR LPAR PLUS MINUS MULT DIV INC DEC MOD EQ AFFECT 
+%token RPAR LPAR PLUS MINUS MULT DIV INC DEC MOD EQ AFFECT
 %token NOT OR AND NEQ LE LT GE GT DOT LBRA RBRA
 %token BOOLEAN CLASS ELSE LEMB REMB SEMICOLON COM MAIN
 %token EXTENDS FALSE FOR IF INSTANCEOF INT NATIVE NEW NULL
@@ -31,7 +31,7 @@
 %left   PLUS MINUS
 %left   MULT DIV MOD
 %right  NOT INC DEC CAST
-%nonassoc UMINUS 
+%nonassoc UMINUS
 %left   DOT
 
 /* Pbm avec le moins unaire, résolu avec l'option %prec et UMINUS */
@@ -61,24 +61,24 @@
 %%
 prog:
     rep_class_def class_main EOF    { ($1, $2) }
-  | error                           { error (Syntax_error None) ( current_pos () ) } 
+  | error                           { error (Syntax_error None) ( current_pos () ) }
 ;
 
-class_def: 
+class_def:
     CLASS IDENT opt_class_params opt_extends_class_expr LEMB rep_decl REMB { ($2, $3, $4, $6) }
 ;
 
 tstring:
-    IDENT { if($1 <> "String") 
-            then error 
-                   (Syntax_error (Some ("literal \"String\" expected but \"" ^ $1 ^ "\" found"))) 
-                   (current_pos ()) 
+    IDENT { if($1 <> "String")
+            then error
+                   (Syntax_error (Some ("literal \"String\" expected but \"" ^ $1 ^ "\" found")))
+                   (current_pos ())
     }
 ;
 
 class_main:
-    PUBLIC CLASS IDENT LEMB PUBLIC STATIC VOID MAIN LPAR tstring IDENT LBRA RBRA RPAR bloc REMB { 
-      ($3, $11, $15) 
+    PUBLIC CLASS IDENT LEMB PUBLIC STATIC VOID MAIN LPAR tstring IDENT LBRA RBRA RPAR bloc REMB {
+      ($3, $11, $15)
     }
 ;
 
@@ -126,23 +126,23 @@ bloc:
 
 instr:
     SEMICOLON                                                          { Nothing }
-  | instr_expr SEMICOLON                                               { Iexpr $1 }  
-  | type_ IDENT opt_affect_expr SEMICOLON                              { Declaration($1, $2, $3) }       
-  | IF LPAR expr RPAR instr   %prec PREC_IF                            { If($3, $5) }           
+  | instr_expr SEMICOLON                                               { Iexpr $1 }
+  | type_ IDENT opt_affect_expr SEMICOLON                              { Declaration($1, $2, $3) }
+  | IF LPAR expr RPAR instr   %prec PREC_IF                            { If($3, $5) }
   | IF LPAR expr RPAR instr ELSE instr                                 { IfElse($3, $5, $7) }
-  | FOR LPAR opt_expr SEMICOLON opt_expr SEMICOLON opt_expr RPAR instr { For($3, $5, $7, $9) }                
-  | bloc                                                               { Bloc $1 }       
-  | RETURN opt_expr SEMICOLON                                          { Return $2 }         
+  | FOR LPAR opt_expr SEMICOLON opt_expr SEMICOLON opt_expr RPAR instr { For($3, $5, $7, $9) }
+  | bloc                                                               { Bloc $1 }
+  | RETURN opt_expr SEMICOLON                                          { Return $2 }
 
 
 instr_expr:
-    acces AFFECT expr                  { Affect($1, $3) }   
-  | appel                              { $1 }         
-  | INC acces                          { PreIncr $2 }           
-  | DEC acces                          { PreDecr $2 }           
-  | acces INC                          { PostIncr $1 }         
-  | acces DEC                          { PostDecr $1 }       
-  | NEW class_expr LPAR rep_expr RPAR  { New($2, $4) }             
+    acces AFFECT expr                  { Affect($1, $3) }
+  | appel                              { $1 }
+  | INC acces                          { PreIncr $2 }
+  | DEC acces                          { PreDecr $2 }
+  | acces INC                          { PostIncr $1 }
+  | acces DEC                          { PostDecr $1 }
+  | NEW class_expr LPAR rep_expr RPAR  { New($2, $4) }
 ;
 
 appel:
@@ -179,10 +179,10 @@ expr:
 
 acces:
     IDENT %prec PREC_ACCES_IDENT  { Ident $1 }
-  | THIS                          { This }  
-  | appel DOT IDENT               { DotAcces($1, $3) }     
-  | acces DOT IDENT               { DotAcces($1, $3) }     
-  | LPAR expr RPAR DOT IDENT      { DotAcces($2, $5) } 
+  | THIS                          { This }
+  | appel DOT IDENT               { DotAcces($1, $3) }
+  | acces DOT IDENT               { DotAcces($1, $3) }
+  | LPAR expr RPAR DOT IDENT      { DotAcces($2, $5) }
 ;
 
 expr_list:
@@ -238,7 +238,7 @@ rep_decl:
     /* empty */   { [] }
   | rep_decl decl { $2::$1 }
 ;
-  
+
 rep_class_def:
     /* empty */               { [] }
   | rep_class_def class_def   { $2::$1 }

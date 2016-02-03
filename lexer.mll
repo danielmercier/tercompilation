@@ -4,7 +4,7 @@
   open Lexing
 
   let keyword_table = Hashtbl.create 72
-  let _ = 
+  let _ =
     List.iter (fun (kwd, tok) -> Hashtbl.add keyword_table kwd tok)
             [("boolean", BOOLEAN); ("class", CLASS); ("else", ELSE); ("extends", EXTENDS);
              ("false", FALSE); ("for", FOR); ("if", IF); ("instanceof", INSTANCEOF);
@@ -13,13 +13,13 @@
              ("main", MAIN)
             ]
 
-  let current_pos lb = 
+  let current_pos lb =
     (Lexing.lexeme_start_p lb, Lexing.lexeme_end_p lb)
 
   let next_line lexbuf =
     let pos = lexbuf.lex_curr_p in
       lexbuf.lex_curr_p <-
-        {  
+        {
           pos with pos_bol = lexbuf.lex_curr_pos;
           pos_lnum = pos.pos_lnum + 1
         }
@@ -89,7 +89,7 @@
     | [' '-'~'] as c { (String.make 1 c) ^ (read_string pos lexbuf) }
     | eof { error (Lexical_error "String not terminated") (current_pos lexbuf) }
     | _ as c { error (Lexical_error ("Illegal character '" ^ String.make 1 c ^ "' in string")) (current_pos lexbuf) }
-            
+
 {
 
 }

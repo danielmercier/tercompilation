@@ -6,15 +6,15 @@ type value =
 
 let get_int = function
   | Vbase (Cint i) -> i
-  | _ -> raise Interpretation_error 
+  | _ -> raise Interpretation_error
 
 let get_bool = function
   | Vbase (Cbool b) -> b
-  | _ -> raise Interpretation_error 
+  | _ -> raise Interpretation_error
 
 let get_string = function
   | Vbase (Cstring s) -> s
-  | _ -> raise Interpretation_error 
+  | _ -> raise Interpretation_error
 
 let unop e = function
   | Unot -> let b = get_bool (interpret_expr e) in Vbase (Cbool not b)
@@ -29,7 +29,7 @@ and binop e1 e2 = function
     in
     f op i1 i2
 
-  | Lt | Le | Gt | Ge as op -> 
+  | Lt | Le | Gt | Ge as op ->
       let i1 = interpret_expr e1
       and i2 = interpret_expr e2
       and f = function
@@ -40,7 +40,7 @@ and binop e1 e2 = function
       in
       f op i1 i2
 
-  | Eq | Neq as op -> 
+  | Eq | Neq as op ->
       let v1 = interpret_expr e1
       and v2 = interpret_expr e2
       and f = function
@@ -51,7 +51,7 @@ and binop e1 e2 = function
 
   | And ->
     let b = get_bool (interpret_expr e1) in
-    if not b 
+    if not b
     then Vbase (Cbool false)
     else
       let b = get_bool (interpret_expr e2) in
@@ -61,7 +61,7 @@ and binop e1 e2 = function
 
   | Or ->
     let b = get_bool (interpret_expr e1) in
-    if b 
+    if b
     then Vbase (Cbool true)
     else
       let b = get_bool (interpret_expr e2) in
