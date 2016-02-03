@@ -6,10 +6,24 @@
   let keyword_table = Hashtbl.create 72
   let _ =
     List.iter (fun (kwd, tok) -> Hashtbl.add keyword_table kwd tok)
-            [("boolean", BOOLEAN); ("class", CLASS); ("else", ELSE); ("extends", EXTENDS);
-             ("false", FALSE); ("for", FOR); ("if", IF); ("instanceof", INSTANCEOF);
-             ("int", INT); ("native", NATIVE); ("new", NEW); ("null", NULL); ("public", PUBLIC);
-             ("return", RETURN); ("static", STATIC); ("this", THIS); ("true", TRUE); ("void", VOID);
+            [("boolean", BOOLEAN);
+             ("class", CLASS);
+             ("else", ELSE);
+             ("extends", EXTENDS);
+             ("false", FALSE);
+             ("for", FOR);
+             ("if", IF);
+             ("instanceof", INSTANCEOF);
+             ("int", INT);
+             ("native", NATIVE);
+             ("new", NEW);
+             ("null", NULL);
+             ("public", PUBLIC);
+             ("return", RETURN);
+             ("static", STATIC);
+             ("this", THIS);
+             ("true", TRUE);
+             ("void", VOID);
              ("main", MAIN)
             ]
 
@@ -29,20 +43,28 @@
   let chiffre = ['0'-'9']
   let eol = ['\n''\r'] | "\r\n"
   let whitespace = [' ''\t']
+  let ident = (alpha | '_')(alpha | '_' | chiffre)*
 
   rule token = parse
     | "//"[^'\n']*'\n' { token lexbuf } (* Commentaire sur une ligne *)
     | "/*" { comment (current_pos lexbuf) lexbuf } (* Commentaire sur plusieurs lignes *)
     | eol { next_line lexbuf; token lexbuf } (* increment du numero de ligne *)
     | whitespace { token lexbuf } (* Whitespace, rien a faire *)
-    | (alpha | '_')(alpha | '_' | chiffre)* as id
+    | ident as id
       {
         try
           Hashtbl.find keyword_table id
         with
           Not_found -> IDENT id
       }
-    | chiffre+ as cnum { CONST (int_of_string cnum) }
+    | chiffre+ as cnum { try
+                            let i = int_of_string cnum in
+                                if i >= int_of_float (-2. ** 31.) && i < int_of_float (2. ** 31.) then
+                                    CONST ( Int32.of_int i )
+                                else
+                                    error (Lexical_error ("integer number too large " ^ cnum)) (current_pos lexbuf)
+                         with Failure _ -> error (Lexical_error ("integer number too large " ^ cnum)) (current_pos lexbuf)
+      }
     | '"' { STRING (read_string (current_pos lexbuf) lexbuf) }
     | "++" { INC }
     | "--" { DEC }

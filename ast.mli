@@ -5,7 +5,7 @@ type 'a node = { value: 'a; pos: position }
 
 type const =
   | Cbool of bool
-  | Cint of int
+  | Cint of Int32.t
   | Cstring of string
   | Cnull
 
@@ -23,19 +23,9 @@ type unop =
   | Unot
 
 type binop =
-  | Add
-  | Sub
-  | Mult
-  | Div
-  | Mod
-  | Eq
-  | Neq
-  | Lt
-  | Le
-  | Gt
-  | Ge
-  | And
-  | Or
+  | Add | Sub | Mult | Div | Mod
+  | Eq  | Neq | Lt   | Le  | Gt | Ge
+  | And | Or
   
 type expr =
   | Const of const
