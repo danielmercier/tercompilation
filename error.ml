@@ -12,12 +12,12 @@ exception Error of error * Ast.position
 
 let report_loc fmt file (b,e) =
   if b = dummy_pos || e = dummy_pos then
-  fprintf fmt "File \"%s\"\nerror: " file
+    fprintf fmt "File \"%s\"\nerror: " file
   else
-  let l = b.pos_lnum in
-  let fc = b.pos_cnum - b.pos_bol + 1 in
-  let lc = e.pos_cnum - b.pos_bol + 1 in
-  fprintf fmt "File \"%s\", line %d, characters %d-%d\nerror: " file l fc lc
+    let l = b.pos_lnum in
+    let fc = b.pos_cnum - b.pos_bol + 1 in
+    let lc = e.pos_cnum - b.pos_bol + 1 in
+    fprintf fmt "File \"%s\", line %d, characters %d-%d\nerror: " file l fc lc
 
 let to_string e =
   match e with
