@@ -3,7 +3,24 @@ open Lexer
 open Parser
 open Format
 
-let file = "test"
+let ext = ".java"
+let usage = Format.sprintf "usage: %s [options] file%s" Sys.argv.(0) ext
+
+let spec = []
+
+(* checking for suffix .java in source file's name *)
+let file =
+    let file = ref None in
+    let set_file s =
+        if not (Filename.check_suffix s ext) then
+            raise (Arg.Bad "Invalid Extension");
+        file := Some s
+    in
+    Arg.parse spec set_file usage;
+    match !file with
+        | Some f -> f
+        | None   -> Arg.usage spec usage ; exit 1
+
 let () =
   let c = open_in file in
   let lb = Lexing.from_channel c in
