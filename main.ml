@@ -6,7 +6,9 @@ open Format
 let ext = ".java"
 let usage = Format.sprintf "usage: %s [options] file%s" Sys.argv.(0) ext
 
-let spec = []
+let parse_only = ref false
+
+let spec = ["-parse-only", Arg.Set parse_only, " stops after parsing"]
 
 (* checking for suffix .java in source file's name *)
 let file =
@@ -28,7 +30,7 @@ let () =
     let ast = Parser.prog Lexer.token lb in
     (*let _ = f lb in*)
     close_in c;
-    exit 0
+    if !parse_only then exit 0;
   with
     | Error.Error (e,p) ->
       Error.print err_formatter file e p;
