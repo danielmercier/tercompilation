@@ -7,3 +7,6 @@ TODO
     - Ecrire des fichiers de test
     - Vérifier que le nom du fichier soit le même que le nom de la classe Main
     - (((Interpreteur pour teste)))
+    - Verifier le Makefile
+    - Enlever les déclarations de type inutile dans le parser
+
