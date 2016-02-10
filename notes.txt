@@ -1,0 +1,5 @@
+
+- En java: erreur si une classe public n'est pas déclaré dans un fichier dont le nom est le nomd de la classe
+    -> dans notre langage, la seule classe qui peut être public est le main, donc on donne l'erreur "Classe contenant main doit avoir le meme nom que le fichier", plutot que "classe public doit être dans un fichier du meme nom" comme en java
+
+
