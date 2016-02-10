@@ -1,9 +1,13 @@
 %{
-  open Error
-  open Ast
+    open Error
+    open Ast
+    open Lexing
 
-  let current_pos () =
-    (Parsing.symbol_start_pos (), Parsing.symbol_end_pos ())
+    let current_pos () =
+        (Parsing.symbol_start_pos (), Parsing.symbol_end_pos ())
+
+    let mk_node elem =
+        {value=elem; pos=current_pos ()}
 %}
 
 %token <string> IDENT STRING
@@ -68,17 +72,26 @@ class_def:
     CLASS IDENT opt_class_params opt_extends_class_expr LEMB rep_decl REMB { ($2, $3, $4, $6) }
 ;
 
+/*Ajout d'un non terminal pour que la position de l'erreur soit plus précise*/
 tstring:
-    IDENT { if($1 <> "String")
-            then error
-                   (Syntax_error (Some ("literal \"String\" expected but \"" ^ $1 ^ "\" found")))
-                   (current_pos ())
+    IDENT {
+        if($1 <> "String") then
+            error (Syntax_error
+                    (Some ("literal \"String\" expected but \"" ^ $1 ^ "\" found")))
+                  (current_pos ())
+    }
+;
+
+/*Ajout d'un non terminal pour que la position de l'erreur soit plus précise*/
+classname:
+    IDENT {
+        mk_node $1
     }
 ;
 
 class_main:
-    PUBLIC CLASS IDENT LEMB PUBLIC STATIC VOID MAIN LPAR tstring IDENT LBRA RBRA RPAR bloc REMB {
-      ($3, $11, $15)
+    PUBLIC CLASS classname LEMB PUBLIC STATIC VOID MAIN LPAR tstring IDENT LBRA RBRA RPAR bloc REMB {
+        ($3, $11, $15)
     }
 ;
 

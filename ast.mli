@@ -89,6 +89,6 @@ type decl =
 
 type class_params = ident list
 type class_def = ident * class_params * class_expr option * decl list
-type class_main = ident * ident * bloc
+type class_main = ident node * ident * bloc
 
 type prog = class_def list * class_main

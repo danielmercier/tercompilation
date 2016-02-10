@@ -2,6 +2,8 @@ open Lexing
 open Lexer
 open Parser
 open Format
+open Error
+open Ast
 
 let ext = ".java"
 let usage = Format.sprintf "usage: %s [options] file%s" Sys.argv.(0) ext
@@ -28,7 +30,15 @@ let () =
   let lb = Lexing.from_channel c in
   try
     let ast = Parser.prog Lexer.token lb in
-    (*let _ = f lb in*)
+    (* Vérification du nom de la classe *)
+    let (_, (classname, _, _)) = ast in
+    let name = String.sub file 0 (String.length file - String.length ext) in
+    let () =
+        if name <> classname.value then
+            error (Syntax_error
+                    (Some (Format.sprintf "the public class \"%s\" containing the main function should have the same name as the file \"%s\"" classname.value name)))
+                  (classname.pos)
+    in
     close_in c;
     if !parse_only then exit 0;
   with
