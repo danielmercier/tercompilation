@@ -2,6 +2,7 @@
   open Error
   open Parser
   open Lexing
+  open Format
 
   let keyword_table = Hashtbl.create 72
   let _ =
@@ -37,6 +38,9 @@
           pos with pos_bol = lexbuf.lex_curr_pos;
           pos_lnum = pos.pos_lnum + 1
         }
+
+  (*strbuf est utile pour read_string, lire une chaine entre guillemet*)
+  let strbuf = Buffer.create 80
 }
 
   let alpha = ['a'-'z''A'-'Z']
@@ -46,9 +50,14 @@
   let ident = (alpha | '_')(alpha | '_' | chiffre)*
 
   rule token = parse
-    | "//"[^'\n']*'\n' { token lexbuf } (* Commentaire sur une ligne *)
-    | "/*" { comment (current_pos lexbuf) lexbuf } (* Commentaire sur plusieurs lignes *)
-    | eol { next_line lexbuf; token lexbuf } (* increment du numero de ligne *)
+    (* Commentaire sur une ligne *)
+    | "//"[^'\n']*'\n' { token lexbuf } 
+
+    (* Commentaire sur plusieurs lignes *)
+    | "/*" { comment (current_pos lexbuf) lexbuf } 
+
+    (* increment du numero de ligne *)
+    | eol { next_line lexbuf; token lexbuf } 
     | whitespace { token lexbuf } (* Whitespace, rien a faire *)
     | ident as id
       {
@@ -57,15 +66,26 @@
         with
           Not_found -> IDENT id
       }
-    | chiffre+ as cnum { try
-                            let i = int_of_string cnum in
-                                if i >= int_of_float (-2. ** 31.) && i < int_of_float (2. ** 31.) then
-                                    CONST ( Int32.of_int i )
-                                else
-                                    error (Lexical_error ("integer number too large " ^ cnum)) (current_pos lexbuf)
-                         with Failure _ -> error (Lexical_error ("integer number too large " ^ cnum)) (current_pos lexbuf)
+    | chiffre+ as cnum { 
+        try
+          let i = int_of_string cnum in
+              if i >= int_of_float (-2. ** 31.) && 
+                 i < int_of_float (2. ** 31.)
+              then CONST ( Int32.of_int i )
+              else 
+                  error 
+                    (Lexical_error ("integer number too large " ^ cnum))
+                    (current_pos lexbuf)
+        with Failure _ -> 
+          error 
+            (Lexical_error ("integer number too large " ^ cnum))
+            (current_pos lexbuf)
       }
-    | '"' { STRING (read_string (current_pos lexbuf) lexbuf) }
+    | '"' {
+        Buffer.reset strbuf;
+        read_string (current_pos lexbuf) lexbuf;
+        STRING (Buffer.contents strbuf)
+    }
     | "++" { INC }
     | "--" { DEC }
     | '+' { PLUS }
@@ -93,7 +113,11 @@
     | '[' { LBRA }
     | ']' { RBRA }
     | eof { EOF }
-    | _ { error (Lexical_error "Character not recognized") (current_pos lexbuf) }
+    | _ {
+        error 
+          (Lexical_error "Character not recognized") 
+          (current_pos lexbuf)
+    }
 
   and comment pos = parse (* Permet de donner plus d'info sur l'erreur *)
     | "*/" { token lexbuf }
@@ -102,15 +126,20 @@
     | _ { comment pos lexbuf }
 
   and read_string pos = parse
-    | "\\n" { "\n" ^ (read_string pos lexbuf) }
-    | "\\t" { "\t" ^ (read_string pos lexbuf) }
-    | "\\\"" { "\"" ^ (read_string pos lexbuf) }
-    | "\\\\" { "\\" ^ (read_string pos lexbuf) }
-    | '"' { "" }
-    | [' '-'~'] as c { (String.make 1 c) ^ (read_string pos lexbuf) }
-    | eof { error (Lexical_error "String not terminated") (current_pos lexbuf) }
-    | _ as c { error (Lexical_error ("Illegal character '" ^ String.make 1 c ^ "' in string")) (current_pos lexbuf) }
-
-{
-
-}
+    | "\\n" { Buffer.add_char strbuf '\n'; read_string pos lexbuf }
+    | "\\t" { Buffer.add_char strbuf '\t'; read_string pos lexbuf }
+    | "\\\"" { Buffer.add_char strbuf  '"'; read_string pos lexbuf }
+    | "\\\\" { Buffer.add_char strbuf '\\'; read_string pos lexbuf }
+    | '"' { () }
+    | [' '-'~'] as c { Buffer.add_char strbuf c; read_string pos lexbuf }
+    | eof {
+        error 
+          (Lexical_error "String not terminated")
+          (current_pos lexbuf) 
+    }
+    | _ as c {
+        error 
+          (Lexical_error 
+            (sprintf "Illegal character '%c' in string" c))
+          (current_pos lexbuf)
+    }
