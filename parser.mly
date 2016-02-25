@@ -2,6 +2,7 @@
     open Error
     open Ast
     open Lexing
+    open Format
 
     let current_pos () =
         (Parsing.symbol_start_pos (), Parsing.symbol_end_pos ())
@@ -70,11 +71,15 @@
 %%
 prog:
     rep_class_def class_main EOF    { ($1, $2) }
-  | error                           { error (Syntax_error None) ( current_pos () ) }
+  | error                           {
+      error (Syntax_error None) ( current_pos () ) 
+    }
 ;
 
 class_def:
-    CLASS IDENT opt_class_params opt_extends_class_expr LEMB rep_decl REMB { ($2, $3, $4, $6) }
+    CLASS IDENT opt_class_params opt_extends_class_expr LEMB rep_decl REMB {
+      ($2, $3, $4, $6)
+    }
 ;
 
 /*Ajout d'un non terminal pour que la position de l'erreur soit plus précise*/
@@ -82,16 +87,17 @@ tstring:
     IDENT {
         if($1 <> "String") then
             error (Syntax_error
-                    (Some ("literal \"String\" expected but \"" ^ $1 ^ "\" found")))
+                   (Some (sprintf 
+                           "literal \"String\" expected but \"%s\" found" 
+                           $1
+                          )))
                   (current_pos ())
     }
 ;
 
 /*Ajout d'un non terminal pour que la position de l'erreur soit plus précise*/
 classname:
-    IDENT {
-        mk_node $1
-    }
+    IDENT { mk_node $1 }
 ;
 
 class_main:
@@ -123,13 +129,21 @@ decl_const:
 ;
 
 decl_meth:
-    VOID IDENT LPAR rep_type_ident RPAR bloc    { DeclMeth(Tvoid, $2, $4, $6) }
-  | type_ IDENT LPAR rep_type_ident RPAR bloc   { DeclMeth($1, $2, $4, $6) }
+    VOID IDENT LPAR rep_type_ident RPAR bloc {
+      DeclMeth(Tvoid, $2, $4, $6)
+    }
+  | type_ IDENT LPAR rep_type_ident RPAR bloc {
+      DeclMeth($1, $2, $4, $6)
+    }
 ;
 
 decl_native_meth:
-    NATIVE VOID IDENT LPAR rep_type_ident RPAR SEMICOLON     { DeclNativeMeth(Tvoid, $3, $5) }
-  | NATIVE type_ IDENT LPAR rep_type_ident RPAR SEMICOLON    { DeclNativeMeth($2, $3, $5) }
+    NATIVE VOID IDENT LPAR rep_type_ident RPAR SEMICOLON {
+      DeclNativeMeth(Tvoid, $3, $5) 
+    }
+  | NATIVE type_ IDENT LPAR rep_type_ident RPAR SEMICOLON { 
+      DeclNativeMeth($2, $3, $5)
+    }
 ;
 
 type_:
@@ -143,14 +157,16 @@ bloc:
 ;
 
 instr:
-    SEMICOLON                                                          { Nothing }
-  | instr_expr SEMICOLON                                               { Iexpr $1 }
-  | type_ IDENT opt_affect_expr SEMICOLON                              { Declaration($1, $2, $3) }
-  | IF LPAR expr RPAR instr   %prec PREC_IF                            { If($3, $5) }
-  | IF LPAR expr RPAR instr ELSE instr                                 { IfElse($3, $5, $7) }
-  | FOR LPAR opt_expr SEMICOLON opt_expr SEMICOLON opt_expr RPAR instr { For($3, $5, $7, $9) }
-  | bloc                                                               { Bloc $1 }
-  | RETURN opt_expr SEMICOLON                                          { Return $2 }
+    SEMICOLON                                { Nothing }
+  | instr_expr SEMICOLON                     { Iexpr $1 }
+  | type_ IDENT opt_affect_expr SEMICOLON    { Declaration($1, $2, $3) }
+  | IF LPAR expr RPAR instr   %prec PREC_IF  { If($3, $5) }
+  | IF LPAR expr RPAR instr ELSE instr       { IfElse($3, $5, $7) }
+  | bloc                                     { Bloc $1 }
+  | RETURN opt_expr SEMICOLON                { Return $2 }
+  | FOR LPAR opt_expr SEMICOLON opt_expr SEMICOLON opt_expr RPAR instr {
+      For($3, $5, $7, $9)
+    }
 
 
 instr_expr:
