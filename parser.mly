@@ -42,25 +42,6 @@
 
 %start prog
 %type <Ast.prog> prog
-%type <Ast.class_def> class_def
-%type <Ast.class_main> class_main
-%type <Ast.class_params> class_params
-%type <Ast.class_expr> class_expr
-%type <Ast.decl> decl decl_att decl_const decl_meth decl_native_meth
-%type <Ast.type_> type_
-%type <Ast.bloc> bloc rep_instr
-%type <Ast.instr> instr
-%type <Ast.expr> expr instr_expr acces appel
-%type <Ast.expr list> expr_list opt_expr_list rep_expr rep_expr_com
-%type <Ast.type_> cast
-%type <Ast.class_params> class_params
-%type <Ast.class_expr option> opt_extends_class_expr
-%type <Ast.expr option> opt_affect_expr opt_expr
-%type <Ast.args> rep_type_ident rep_type_ident_com
-%type <Ast.decl list> rep_decl
-%type <Ast.class_def list> rep_class_def
-%type <Ast.ident list> rep1_ident
-%type <Ast.class_expr list> rep1_class_expr
 
 %%
 prog:
