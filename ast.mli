@@ -36,48 +36,51 @@ type boolbinop =
   
 type expr =
   | Const of const
-  | Unop of unop * expr
+  | Unop of unop * expr node
 
   (* Opérations séparée pour le typage *)
-  | Intbinop of intbinop * expr * expr
-  | Bineq of bineq * expr * expr
-  | Intbincmp of intbincmp * expr * expr
-  | Boolbinop of boolbinop * expr * expr
+  | Intbinop of intbinop * expr node * expr node
+  | Bineq of bineq * expr node * expr node
+  | Intbincmp of intbincmp * expr node * expr node
+  | Boolbinop of boolbinop * expr node * expr node
   (*************************************)
 
-  | Instanceof of expr * class_expr
-  | Cast of type_ * expr
+  | Instanceof of expr node * class_expr
+  | Cast of type_ * expr node
 
   (* instr_expr dans la grammaire *)
-  | Affect of expr * expr
-  | PostIncr of expr
-  | PreIncr of expr
-  | PostDecr of expr
-  | PreDecr of expr
-  | New of class_expr * (expr) list
+  | Affect of expr node * expr node
+  | PostIncr of expr node
+  | PreIncr of expr node
+  | PostDecr of expr node
+  | PreDecr of expr node
+  | New of class_expr * (expr node) list
   (********************************)
 
   (* acces dans la grammaire *)
   | Ident of ident
   | This
-  | DotAcces of expr * ident
+  | DotAcces of expr node * ident
   (***************************)
 
   (* appel dans la grammaire *)
-  | Appel of expr * (expr) list
+  | Appel of expr node * (expr node) list
   (***************************)
 
 type bloc = instr list
 
 and instr =
   | Nothing
-  | Iexpr of expr
-  | Declaration of type_ * ident * expr option
-  | If of expr * instr
-  | IfElse of expr * instr * instr
-  | For of expr option * expr option * expr option * instr
+  | Iexpr of expr node
+  | Declaration of type_ * ident * (expr node) option
+  | If of expr node * instr
+  | IfElse of expr node * instr * instr
+  | For of (expr node) option * 
+           (expr node) option * 
+           (expr node) option * 
+           instr
   | Bloc of bloc
-  | Return of expr option
+  | Return of (expr node) option
 
 type args = (type_ * ident) list
 

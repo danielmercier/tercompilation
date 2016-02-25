@@ -154,53 +154,54 @@ instr:
 
 
 instr_expr:
-    acces AFFECT expr                  { Affect($1, $3) }
+    acces AFFECT expr                  { mk_node (Affect($1, $3)) }
   | appel                              { $1 }
-  | INC acces                          { PreIncr $2 }
-  | DEC acces                          { PreDecr $2 }
-  | acces INC                          { PostIncr $1 }
-  | acces DEC                          { PostDecr $1 }
-  | NEW class_expr LPAR rep_expr RPAR  { New($2, $4) }
+  | INC acces                          { mk_node (PreIncr $2) }
+  | DEC acces                          { mk_node (PreDecr $2) }
+  | acces INC                          { mk_node (PostIncr $1) }
+  | acces DEC                          { mk_node (PostDecr $1) }
+  | NEW class_expr LPAR rep_expr RPAR  { mk_node (New($2, $4)) }
 ;
 
 appel:
-    acces LPAR opt_expr_list RPAR { Appel($1, $3) }
+    acces LPAR opt_expr_list RPAR { mk_node (Appel($1, $3)) }
 ;
 
 expr:
-    TRUE                          { Const (Cbool true) }
-  | FALSE                         { Const (Cbool false) }
-  | CONST                         { Const (Cint $1) }
-  | STRING                        { Const (Cstring $1) }
-  | NULL                          { Const Cnull }
-  | NOT expr                      { Unop (Unot, $2) }
-  | MINUS expr %prec UMINUS       { Unop (Uminus, $2) } /* Permet a MINUS de ce comporter avec les règle de UMINUS */
-  | expr PLUS expr                { Intbinop(Add, $1, $3) }
-  | expr MINUS expr               { Intbinop(Sub, $1, $3) }
-  | expr MULT expr                { Intbinop(Mult, $1, $3) }
-  | expr DIV expr                 { Intbinop(Div, $1, $3) }
-  | expr MOD expr                 { Intbinop(Mod, $1, $3) }
-  | expr AND expr                 { Boolbinop(And, $1, $3) }
-  | expr OR expr                  { Boolbinop(Or, $1, $3) }
-  | expr EQ expr                  { Bineq(Eq, $1, $3) }
-  | expr NEQ expr                 { Bineq(Neq, $1, $3) }
-  | expr LT expr                  { Intbincmp(Lt, $1, $3) }
-  | expr LE expr                  { Intbincmp(Le, $1, $3) }
-  | expr GT expr                  { Intbincmp(Gt, $1, $3) }
-  | expr GE expr                  { Intbincmp(Ge, $1, $3) }
-  | expr INSTANCEOF class_expr    { Instanceof($1, $3) }
-  | cast expr   %prec CAST        { Cast($1, $2) }
+    TRUE                          { mk_node (Const (Cbool true)) }
+  | FALSE                         { mk_node (Const (Cbool false)) }
+  | CONST                         { mk_node (Const (Cint $1)) }
+  | STRING                        { mk_node (Const (Cstring $1)) }
+  | NULL                          { mk_node (Const Cnull) }
+  | NOT expr                      { mk_node (Unop (Unot, $2)) }
+  /* %prec Permet a MINUS de ce comporter avec les règle de UMINUS */
+  | MINUS expr %prec UMINUS       { mk_node (Unop (Uminus, $2)) } 
+  | expr PLUS expr                { mk_node (Intbinop(Add, $1, $3)) }
+  | expr MINUS expr               { mk_node (Intbinop(Sub, $1, $3)) }
+  | expr MULT expr                { mk_node (Intbinop(Mult, $1, $3)) }
+  | expr DIV expr                 { mk_node (Intbinop(Div, $1, $3)) }
+  | expr MOD expr                 { mk_node (Intbinop(Mod, $1, $3)) }
+  | expr AND expr                 { mk_node (Boolbinop(And, $1, $3)) }
+  | expr OR expr                  { mk_node (Boolbinop(Or, $1, $3)) }
+  | expr EQ expr                  { mk_node (Bineq(Eq, $1, $3)) }
+  | expr NEQ expr                 { mk_node (Bineq(Neq, $1, $3)) }
+  | expr LT expr                  { mk_node (Intbincmp(Lt, $1, $3)) }
+  | expr LE expr                  { mk_node (Intbincmp(Le, $1, $3)) }
+  | expr GT expr                  { mk_node (Intbincmp(Gt, $1, $3)) }
+  | expr GE expr                  { mk_node (Intbincmp(Ge, $1, $3)) }
+  | expr INSTANCEOF class_expr    { mk_node (Instanceof($1, $3)) }
+  | cast expr   %prec CAST        { mk_node (Cast($1, $2)) }
   | instr_expr                    { $1 }
   | acces                         { $1 }
   | LPAR expr RPAR                { $2 }
 ;
 
 acces:
-    IDENT %prec PREC_ACCES_IDENT  { Ident $1 }
-  | THIS                          { This }
-  | appel DOT IDENT               { DotAcces($1, $3) }
-  | acces DOT IDENT               { DotAcces($1, $3) }
-  | LPAR expr RPAR DOT IDENT      { DotAcces($2, $5) }
+    IDENT %prec PREC_ACCES_IDENT  { mk_node (Ident $1) }
+  | THIS                          { mk_node (This) }
+  | appel DOT IDENT               { mk_node (DotAcces($1, $3)) }
+  | acces DOT IDENT               { mk_node (DotAcces($1, $3)) }
+  | LPAR expr RPAR DOT IDENT      { mk_node (DotAcces($2, $5)) }
 ;
 
 expr_list:
