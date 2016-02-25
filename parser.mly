@@ -12,12 +12,36 @@
 
 %token <string> IDENT STRING
 %token <Int32.t> CONST
-%token RPAR LPAR PLUS MINUS MULT DIV INC DEC MOD EQ AFFECT
-%token NOT OR AND NEQ LE LT GE GT DOT LBRA RBRA
-%token BOOLEAN CLASS ELSE LEMB REMB SEMICOLON COM MAIN
-%token EXTENDS FALSE FOR IF INSTANCEOF INT NATIVE NEW NULL
-%token PUBLIC RETURN STATIC THIS TRUE VOID EOF UMINUS CAST
-%token PREC_IF PREC_ACCES_IDENT
+%token PLUS UMINUS MINUS MULT DIV MOD
+%token INC DEC 
+%token EQ NEQ
+%token NOT OR AND 
+%token LE LT GE GT 
+%token RPAR LPAR 
+%token LBRA RBRA
+%token LEMB REMB
+%token AFFECT
+%token DOT 
+%token COM
+%token SEMICOLON
+%token IF ELSE FOR
+%token BOOLEAN TRUE FALSE
+%token CLASS
+%token MAIN
+%token EXTENDS
+%token INSTANCEOF
+%token INT
+%token NATIVE
+%token NEW
+%token NULL
+%token PUBLIC
+%token RETURN
+%token STATIC
+%token THIS
+%token VOID
+%token EOF
+%token CAST
+%token PREC_IF PREC_ACCES_IDENT 
 
 %nonassoc PREC_IF
 %nonassoc ELSE
