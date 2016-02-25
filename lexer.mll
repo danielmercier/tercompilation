@@ -38,6 +38,9 @@
           pos with pos_bol = lexbuf.lex_curr_pos;
           pos_lnum = pos.pos_lnum + 1
         }
+
+  (*strbuf est utile pour read_string, lire une chaine entre guillemet*)
+  let strbuf = Buffer.create 80
 }
 
   let alpha = ['a'-'z''A'-'Z']
@@ -78,7 +81,11 @@
             (Lexical_error ("integer number too large " ^ cnum))
             (current_pos lexbuf)
       }
-    | '"' { STRING (read_string (current_pos lexbuf) lexbuf) }
+    | '"' {
+        Buffer.reset strbuf;
+        read_string (current_pos lexbuf) lexbuf;
+        STRING (Buffer.contents strbuf)
+    }
     | "++" { INC }
     | "--" { DEC }
     | '+' { PLUS }
@@ -119,12 +126,12 @@
     | _ { comment pos lexbuf }
 
   and read_string pos = parse
-    | "\\n" { "\n" ^ (read_string pos lexbuf) }
-    | "\\t" { "\t" ^ (read_string pos lexbuf) }
-    | "\\\"" { "\"" ^ (read_string pos lexbuf) }
-    | "\\\\" { "\\" ^ (read_string pos lexbuf) }
-    | '"' { "" }
-    | [' '-'~'] as c { (String.make 1 c) ^ (read_string pos lexbuf) }
+    | "\\n" { Buffer.add_char strbuf '\n'; read_string pos lexbuf }
+    | "\\t" { Buffer.add_char strbuf '\t'; read_string pos lexbuf }
+    | "\\\"" { Buffer.add_char strbuf  '"'; read_string pos lexbuf }
+    | "\\\\" { Buffer.add_char strbuf '\\'; read_string pos lexbuf }
+    | '"' { () }
+    | [' '-'~'] as c { Buffer.add_char strbuf c; read_string pos lexbuf }
     | eof {
         error 
           (Lexical_error "String not terminated")
