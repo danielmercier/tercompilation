@@ -1,5 +1,38 @@
 
 - En java: erreur si une classe public n'est pas déclaré dans un fichier dont le nom est le nomd de la classe
-    -> dans notre langage, la seule classe qui peut être public est le main, donc on donne l'erreur "Classe contenant main doit avoir le meme nom que le fichier", plutot que "classe public doit être dans un fichier du meme nom" comme en java
+    -> dans notre langage, la seule classe qui peut être public est le main,
+       donc on donne l'erreur "Classe contenant main doit avoir le meme nom que le fichier",
+       plutot que "classe public doit être dans un fichier du meme nom" comme en java
 
+- commentaires en français
+  et noms de variables et erreur en anglais
 
+- Int32.of_int ne renvoie pas d'erreur dans le cas où le int est plus 2^31 ou inférieur -2^31
+    donc on vérifie la taille du int avant.
+
+- déclarer filename dans:
+    - Lexer -> Lexer compilé après le parser
+    - Parser (header et trailer) -> pas accès dans le main
+  -> on est obliger de faire le test dans le main: verif a partir de l'ast, on récupere la position dans le node ident du nom de la classe pour renvoyer une erreur de syntaxe précise à partir du main
+
+- cas du cast (ident) expr:
+    conflit entre "(expr)", où "expr" serait un "acces" et "acces" un "ident",  et le cast "(ident)"
+    -> conflit de shift-reduce au moment où on lit "(ident", on ne sait pas si on reduit "ident" en "acces" ou on lit ")"
+    pour regler le conflit, on ajoute une regle de precedence entre la regle que l'on veut reduce (acces) et le token qu'on veut shift (RPAR),
+        -> cf regle de precedence PREC_ACCES_IDENT plus faible que RPAR
+
+    conflits shift-reduce pour le cas "cast expr":
+    -> conflit de shift-reduce lorsque le "cast expr" est suivi d'un opérateur,
+        shift de l'opérateur et reduce de "expr" (venant "cast expr")
+
+    on établit une regle de precedence avec CAST qui a une precedence plus forte que ACCES_IDENT
+    plutot que de reduire (ident) en expr puis matcher "expr expr" pour déterminer que c'est un cast
+
+    ajouter EXEMPLE
+
+- conflit entre le shift de LT et reduce de class_expr:
+    class_expr peut peut representer une déclaration de classe parametrer
+    donc conflit sur LT entre debut de parametre et operateur LOWER THAN
+    on shift LT au lieu de reduce class_expr
+
+    ajouter EXEMPLE
