@@ -9,7 +9,7 @@ type const =
   | Cstring of string
   | Cnull
 
-type class_expr = 
+type class_expr =
   | CIdent of ident * (class_expr) list
 
 type type_ =
@@ -25,15 +25,15 @@ type unop =
 type intbinop =
   | Add | Sub | Mult | Div | Mod
 
-type bineq = 
-  | Eq | Neq 
+type bineq =
+  | Eq | Neq
 
 type intbincmp =
   | Lt | Le | Gt | Ge
 
 type boolbinop =
   | And | Or
-  
+
 type expr =
   | Const of const
   | Unop of unop * expr node
@@ -75,9 +75,9 @@ and instr =
   | Declaration of type_ * ident * (expr node) option
   | If of expr node * instr
   | IfElse of expr node * instr * instr
-  | For of (expr node) option * 
-           (expr node) option * 
-           (expr node) option * 
+  | For of (expr node) option *
+           (expr node) option *
+           (expr node) option *
            instr
   | Bloc of bloc
   | Return of (expr node) option

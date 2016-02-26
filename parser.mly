@@ -14,15 +14,15 @@
 %token <string> IDENT STRING
 %token <Int32.t> CONST
 %token PLUS UMINUS MINUS MULT DIV MOD
-%token INC DEC 
+%token INC DEC
 %token EQ NEQ
-%token NOT OR AND 
-%token LE LT GE GT 
-%token RPAR LPAR 
+%token NOT OR AND
+%token LE LT GE GT
+%token RPAR LPAR
 %token LBRA RBRA
 %token LEMB REMB
 %token AFFECT
-%token DOT 
+%token DOT
 %token COM
 %token SEMICOLON
 %token IF ELSE FOR
@@ -42,7 +42,7 @@
 %token VOID
 %token EOF
 %token CAST
-%token PREC_IF PREC_ACCES_IDENT 
+%token PREC_IF PREC_ACCES_IDENT
 
 %nonassoc PREC_IF
 %nonassoc ELSE
@@ -72,7 +72,7 @@
 prog:
     rep_class_def class_main EOF    { ($1, $2) }
   | error                           {
-      error (Syntax_error None) ( current_pos () ) 
+      error (Syntax_error None) ( current_pos () )
     }
 ;
 
@@ -87,8 +87,8 @@ tstring:
     IDENT {
         if($1 <> "String") then
             error (Syntax_error
-                   (Some (sprintf 
-                           "literal \"String\" expected but \"%s\" found" 
+                   (Some (sprintf
+                           "literal \"String\" expected but \"%s\" found"
                            $1
                           )))
                   (current_pos ())
@@ -139,9 +139,9 @@ decl_meth:
 
 decl_native_meth:
     NATIVE VOID IDENT LPAR rep_type_ident RPAR SEMICOLON {
-      DeclNativeMeth(Tvoid, $3, $5) 
+      DeclNativeMeth(Tvoid, $3, $5)
     }
-  | NATIVE type_ IDENT LPAR rep_type_ident RPAR SEMICOLON { 
+  | NATIVE type_ IDENT LPAR rep_type_ident RPAR SEMICOLON {
       DeclNativeMeth($2, $3, $5)
     }
 ;
@@ -191,7 +191,7 @@ expr:
   | NULL                          { mk_node (Const Cnull) }
   | NOT expr                      { mk_node (Unop (Unot, $2)) }
   /* %prec Permet a MINUS de ce comporter avec les règle de UMINUS */
-  | MINUS expr %prec UMINUS       { mk_node (Unop (Uminus, $2)) } 
+  | MINUS expr %prec UMINUS       { mk_node (Unop (Uminus, $2)) }
   | expr PLUS expr                { mk_node (Intbinop(Add, $1, $3)) }
   | expr MINUS expr               { mk_node (Intbinop(Sub, $1, $3)) }
   | expr MULT expr                { mk_node (Intbinop(Mult, $1, $3)) }

@@ -51,13 +51,13 @@
 
   rule token = parse
     (* Commentaire sur une ligne *)
-    | "//"[^'\n']*'\n' { token lexbuf } 
+    | "//"[^'\n']*'\n' { token lexbuf }
 
     (* Commentaire sur plusieurs lignes *)
-    | "/*" { comment (current_pos lexbuf) lexbuf } 
+    | "/*" { comment (current_pos lexbuf) lexbuf }
 
     (* increment du numero de ligne *)
-    | eol { next_line lexbuf; token lexbuf } 
+    | eol { next_line lexbuf; token lexbuf }
     | whitespace { token lexbuf } (* Whitespace, rien a faire *)
     | ident as id
       {
@@ -66,18 +66,18 @@
         with
           Not_found -> IDENT id
       }
-    | chiffre+ as cnum { 
+    | chiffre+ as cnum {
         try
           let i = int_of_string cnum in
-              if i >= int_of_float (-2. ** 31.) && 
+              if i >= int_of_float (-2. ** 31.) &&
                  i < int_of_float (2. ** 31.)
               then CONST ( Int32.of_int i )
-              else 
-                  error 
+              else
+                  error
                     (Lexical_error ("integer number too large " ^ cnum))
                     (current_pos lexbuf)
-        with Failure _ -> 
-          error 
+        with Failure _ ->
+          error
             (Lexical_error ("integer number too large " ^ cnum))
             (current_pos lexbuf)
       }
@@ -114,8 +114,8 @@
     | ']' { RBRA }
     | eof { EOF }
     | _ {
-        error 
-          (Lexical_error "Character not recognized") 
+        error
+          (Lexical_error "Character not recognized")
           (current_pos lexbuf)
     }
 
@@ -133,13 +133,13 @@
     | '"' { () }
     | [' '-'~'] as c { Buffer.add_char strbuf c; read_string pos lexbuf }
     | eof {
-        error 
+        error
           (Lexical_error "String not terminated")
-          (current_pos lexbuf) 
+          (current_pos lexbuf)
     }
     | _ as c {
-        error 
-          (Lexical_error 
+        error
+          (Lexical_error
             (sprintf "Illegal character '%c' in string" c))
           (current_pos lexbuf)
     }
