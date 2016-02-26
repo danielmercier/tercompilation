@@ -69,8 +69,7 @@
     | chiffre+ as cnum {
         try
           let i = int_of_string cnum in
-              if i >= int_of_float (-2. ** 31.) &&
-                 i < int_of_float (2. ** 31.)
+              if i <= int_of_float (2. ** 31.)
               then CONST ( Int32.of_int i )
               else
                   error
