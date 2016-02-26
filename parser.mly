@@ -70,7 +70,7 @@
 
 %%
 prog:
-    rep_class_def class_main EOF    { ($1, $2) }
+    rep_class_def class_main EOF    { (List.rev $1, $2) }
   | error                           {
       error (Syntax_error None) ( current_pos () )
     }
@@ -78,7 +78,7 @@ prog:
 
 class_def:
     CLASS IDENT opt_class_params opt_extends_class_expr LEMB rep_decl REMB {
-      ($2, $3, $4, $6)
+      ($2, $3, $4, List.rev $6)
     }
 ;
 
@@ -107,11 +107,11 @@ class_main:
 ;
 
 class_params:
-    LT rep1_ident GT { $2 }
+    LT rep1_ident GT { List.rev $2 }
 
 class_expr:
     IDENT  %prec IDENT_CLASS_EXPR  { CIdent($1, []) }
-  | IDENT LT rep1_class_expr GT    { CIdent($1, $3) }
+  | IDENT LT rep1_class_expr GT    { CIdent($1, List.rev $3) }
 
 decl:
     decl_att          { $1 }
@@ -125,24 +125,24 @@ decl_att:
 ;
 
 decl_const:
-    IDENT LPAR rep_type_ident RPAR bloc   { DeclConst($1, $3, $5) }
+    IDENT LPAR rep_type_ident RPAR bloc   { DeclConst($1, List.rev $3, $5) }
 ;
 
 decl_meth:
     VOID IDENT LPAR rep_type_ident RPAR bloc {
-      DeclMeth(Tvoid, $2, $4, $6)
+      DeclMeth(Tvoid, $2, List.rev $4, $6)
     }
   | type_ IDENT LPAR rep_type_ident RPAR bloc {
-      DeclMeth($1, $2, $4, $6)
+      DeclMeth($1, $2, List.rev $4, $6)
     }
 ;
 
 decl_native_meth:
     NATIVE VOID IDENT LPAR rep_type_ident RPAR SEMICOLON {
-      DeclNativeMeth(Tvoid, $3, $5)
+      DeclNativeMeth(Tvoid, $3, List.rev $5)
     }
   | NATIVE type_ IDENT LPAR rep_type_ident RPAR SEMICOLON {
-      DeclNativeMeth($2, $3, $5)
+      DeclNativeMeth($2, $3, List.rev $5)
     }
 ;
 
@@ -153,7 +153,7 @@ type_:
 ;
 
 bloc:
-    LEMB rep_instr REMB { $2 }
+    LEMB rep_instr REMB { List.rev $2 }
 ;
 
 instr:
@@ -176,7 +176,7 @@ instr_expr:
   | DEC acces                          { mk_node (PreDecr $2) }
   | acces INC                          { mk_node (PostIncr $1) }
   | acces DEC                          { mk_node (PostDecr $1) }
-  | NEW class_expr LPAR rep_expr RPAR  { mk_node (New($2, $4)) }
+  | NEW class_expr LPAR rep_expr RPAR  { mk_node (New($2, List.rev $4)) }
 ;
 
 appel:
