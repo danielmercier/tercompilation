@@ -4,6 +4,7 @@ open Parser
 open Format
 open Error
 open Ast
+open Printast
 
 let ext = ".java"
 let usage = Format.sprintf "usage: %s [options] file%s" Sys.argv.(0) ext
@@ -30,6 +31,9 @@ let () =
   let lb = Lexing.from_channel c in
   try
     let ast = Parser.prog Lexer.token lb in
+    (* Affichage de l'ast sous le format dot de graphviz dans le fichier *)
+    let () = print_ast "ast.dot" ast in
+    (*****************************************************)
     (* Vérification du nom de la classe *)
     let (_, (classname, _, _)) = ast in
     let f2 = List.hd (List.rev (Str.split (Str.regexp "/") file)) in
