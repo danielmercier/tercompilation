@@ -32,7 +32,8 @@ let () =
     let ast = Parser.prog Lexer.token lb in
     (* Vérification du nom de la classe *)
     let (_, (classname, _, _)) = ast in
-    let name = String.sub file 0 (String.length file - String.length ext) in
+    let f2 = List.hd (List.rev (Str.split (Str.regexp "/") file)) in
+    let name = String.sub f2 0 (String.length f2 - String.length ext) in
     let () =
         if name <> classname.value then
             error (Syntax_error
